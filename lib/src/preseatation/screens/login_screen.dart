@@ -9,6 +9,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  String? email;
+  String? password;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -23,9 +26,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Image.asset('assets/images/instantaneo-large.png'),
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
               child: CustomTextField(
+                onChanged: (value) {
+                  password = value;
+                },
+                onTap: () => print(password),
+                keyboardType: TextInputType.emailAddress,
                 hintText: 'youremailexample@gmail.com',
                 labelText: 'Email',
               ),
@@ -33,13 +41,19 @@ class _LoginScreenState extends State<LoginScreen> {
             const SizedBox(
               height: 25,
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15),
               child: CustomTextField(
+                onChanged: (value) {
+                  password = value;
+                },
+                onTap: () => print(password),
+                keyboardType: TextInputType.visiblePassword,
                 hintText: 'Digite sua senha',
                 labelText: 'Password',
-                isObscureChacaracter: '*',
+                obscureCharacter: '*',
                 isObscureText: true,
+                maxLenght: 20,
               ),
             ),
           ],

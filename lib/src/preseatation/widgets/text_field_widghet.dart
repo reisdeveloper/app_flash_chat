@@ -1,33 +1,44 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController? controller;
   final TextInputType? keyboardType;
   final bool? isObscureText;
-  final String? isObscureChacaracter;
+  final String obscureCharacter;
   final String? hintText;
   final String? labelText;
+  final int? maxLenght;
+  final void Function()? onTap;
+  final void Function(String)? onChanged;
 
   const CustomTextField({
-    super.key,
+    Key? key,
     this.controller,
     this.keyboardType,
     this.isObscureText = false,
-    this.isObscureChacaracter = '*',
+    this.obscureCharacter = '*',
     this.hintText,
     this.labelText,
-  });
+    this.maxLenght,
+    this.onTap,
+    this.onChanged,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     return TextFormField(
-      onTap: () {},
+      onTap: onTap,
+      onChanged: onChanged,
       controller: controller,
       keyboardType: keyboardType,
       obscureText: isObscureText ?? false,
-      obscuringCharacter: isObscureChacaracter ?? '*',
+      obscuringCharacter: obscureCharacter,
+      maxLength: maxLenght,
+      maxLines:
+          isObscureText != null && isObscureText! ? obscureCharacter.length : 1,
       decoration: InputDecoration(
         contentPadding:
             const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
