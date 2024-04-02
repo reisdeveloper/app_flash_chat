@@ -26,7 +26,7 @@ class _RegistrationScreenState extends State<ResgistrerScreen> {
                   email = value;
                 },
                 labelText: 'Email',
-                hintText: 'youremailexample@gmail.com',
+                hintText: 'exemploseuemail@gmail.com',
               ),
             ),
             const SizedBox(
@@ -39,8 +39,8 @@ class _RegistrationScreenState extends State<ResgistrerScreen> {
                 onChanged: (value) {
                   password = value;
                 },
-                labelText: 'Password',
-                hintText: 'write your password',
+                labelText: 'Senha',
+                hintText: 'Digite sua senha',
               ),
             ),
             const SizedBox(
@@ -53,8 +53,8 @@ class _RegistrationScreenState extends State<ResgistrerScreen> {
                 onChanged: (value) {
                   password = value;
                 },
-                labelText: 'Confirm Password',
-                hintText: 'write your password again',
+                labelText: 'Confirme sua senha',
+                hintText: 'Confirme sua senha',
               ),
             ),
             Row(
