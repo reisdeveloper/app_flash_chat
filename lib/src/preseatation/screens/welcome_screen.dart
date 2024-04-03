@@ -1,5 +1,4 @@
 import 'package:app_chat_flash/src/config/router/router.dart';
-import 'package:app_chat_flash/src/preseatation/widgets/button_widget.dart';
 import 'package:app_chat_flash/src/preseatation/widgets/welcome_title_widget.dart';
 import 'package:flutter/material.dart';
 
