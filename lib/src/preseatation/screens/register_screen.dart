@@ -1,4 +1,6 @@
+import 'package:app_chat_flash/src/config/router/router.dart';
 import 'package:app_chat_flash/src/preseatation/widgets/text_field_widghet.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ResgistrerScreen extends StatefulWidget {
@@ -9,12 +11,14 @@ class ResgistrerScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<ResgistrerScreen> {
-  String? _password;
-  String? _email;
-
   @override
   Widget build(BuildContext context) {
-    double widht = MediaQuery.of(context).size.width;
+    final _auth = FirebaseAuth.instance;
+    late String _email;
+    late String _password;
+
+    double width = MediaQuery.of(context).size.width;
+    double height = MediaQuery.of(context).size.height;
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -35,7 +39,12 @@ class _RegistrationScreenState extends State<ResgistrerScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: CustomTextField(
-                  onTap: () {},
+                  onTap: () {
+                    _auth.createUserWithEmailAndPassword(
+                      email: _email,
+                      password: _password,
+                    );
+                  },
                   onChanged: (value) {
                     _email = value;
                   },
@@ -58,41 +67,32 @@ class _RegistrationScreenState extends State<ResgistrerScreen> {
                 ),
               ),
               const SizedBox(
-                height: 20,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: CustomTextField(
-                  onTap: () {},
-                  onChanged: (value) {
-                    _password = value;
-                  },
-                  labelText: 'Confirme sua senha',
-                  hintText: 'Confirme sua senha',
-                ),
-              ),
-              const SizedBox(
                 height: 50,
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: SizedBox(
-                  height: 30,
-                  width: widht,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Icon(
-                        Icons.person,
-                      ),
-                      Icon(
-                        Icons.person,
-                      ),
-                      Icon(
-                        Icons.person,
-                      )
-                    ],
+                padding: const EdgeInsets.symmetric(horizontal: 25),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      final newUser =
+                          await _auth.createUserWithEmailAndPassword(
+                        email: _email,
+                        password: _password,
+                      );
+                      if (newUser != null) {
+                        Navigator.of(context)
+                            .pushNamed(NamedRoutes.chat_screen);
+                      }
+                    } catch (e) {
+                      print(e);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(width, height * 0.065),
+                    backgroundColor: Colors.lightBlue,
+                    foregroundColor: Colors.white,
                   ),
+                  child: Text('Register'),
                 ),
               )
             ],
