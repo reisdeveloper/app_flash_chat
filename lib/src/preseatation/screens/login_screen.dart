@@ -1,4 +1,6 @@
+import 'package:app_chat_flash/src/auth/user_auth/firebase_auth_implemetation/firebase_auth_service.dart';
 import 'package:app_chat_flash/src/config/router/router.dart';
+import 'package:app_chat_flash/src/global/common/toast.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -12,67 +14,18 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailKey = GlobalKey<FormFieldState>();
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _password = TextEditingController();
+  final _passwordKey = GlobalKey<FormFieldState>();
+  bool _isSigning = false;
+  final FirebaseAuthService _auth = FirebaseAuthService();
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  Future<void> singInWithEmailAndPassword(BuildContext context) async {
-    final email = _email.text.trim();
-    final password = _password.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, preencha todos os campos.'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return;
-    }
-
-    try {
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      Navigator.pushNamed(context, NamedRoutes.chat_screen);
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content:
-                Text('E-mail não encontrado. Por favor, verifique o e-mail.'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-      } else if (e.code == 'wrong-password') {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Senha incorreta. Por favor, verifique a senha.'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-      } else if (e.code == 'ERROR_INVALID_CREDENTIAL') {
-        // Tratar outras exceções
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-                'Erro ao fazer login. Por favor, tente novamente mais tarde.'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-        print('Erro de autenticação: ${e.code}');
-      }
-    } catch (e) {
-      // Tratar outras exceções
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'Erro ao fazer login. Por favor, tente novamente mais tarde.'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      print('Erro ao fazer login: $e');
-    }
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -94,16 +47,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   horizontal: 20,
                 ),
                 child: TextFormField(
+                  onTap: () {},
                   key: _emailKey,
                   keyboardType: TextInputType.emailAddress,
                   validator: (String? value) {
                     if (value == null || value.isEmpty) {
-                      return 'Email Obrigatório';
+                      return 'O email é obrigatório';
                     }
                     return null;
                   },
-                  onTap: () {},
-                  controller: _email,
+                  controller: _emailController,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
                     color: Colors.white,
@@ -138,17 +91,16 @@ class _LoginScreenState extends State<LoginScreen> {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextFormField(
+                  key: _passwordKey,
                   onTap: () {},
-                  controller: _password,
+                  controller: _passwordController,
                   keyboardType: TextInputType.visiblePassword,
                   obscuringCharacter: '•',
                   obscureText: true,
                   maxLength: 20,
                   validator: (String? value) {
                     if (value == null || value.isEmpty) {
-                      _formKey.currentState?.reset();
-                      _emailKey.currentState?.validate();
-                      return 'Senha Obrigatória';
+                      return 'A senha é obrigatória';
                     }
                     return null;
                   },
@@ -182,7 +134,6 @@ class _LoginScreenState extends State<LoginScreen> {
               TextButton(
                 onPressed: () {
                   _formKey.currentState?.reset();
-                  _emailKey.currentState?.validate();
                 },
                 child: const Text(
                   'Esqueceu a senha?',
@@ -200,7 +151,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: ElevatedButton(
                   onPressed: () {
-                    singInWithEmailAndPassword(context);
+                    try {
+                      _formKey.currentState?.validate();
+                      if (_passwordKey.currentState!.validate() &&
+                          _emailKey.currentState!.validate()) {
+                        _signIn();
+                      }
+                    } catch (e) {
+                      showToast(msg: '$e');
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     minimumSize: Size(
@@ -228,5 +187,27 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  void _signIn() async {
+    setState(() {
+      _isSigning = true;
+    });
+
+    String email = _emailController.text;
+    String password = _passwordController.text;
+
+    User? user = await _auth.signInWithEmailAndPassword(email, password);
+
+    setState(() {
+      _isSigning = false;
+    });
+
+    if (user != null) {
+      Navigator.of(context).pushNamed(NamedRoutes.chat_screen);
+      showToast(msg: 'Bem vindo de volta! =)', background: Colors.green);
+    } else {
+      showToast(msg: 'Falha na autenticação', background: Colors.red);
+    }
   }
 }

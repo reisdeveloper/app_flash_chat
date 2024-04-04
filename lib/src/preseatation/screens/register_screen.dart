@@ -1,4 +1,6 @@
+import 'package:app_chat_flash/src/auth/user_auth/firebase_auth_implemetation/firebase_auth_service.dart';
 import 'package:app_chat_flash/src/config/router/router.dart';
+import 'package:app_chat_flash/src/global/common/toast.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -10,46 +12,19 @@ class ResgistrerScreen extends StatefulWidget {
 }
 
 class _ResgistrerScreenState extends State<ResgistrerScreen> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
   final formKey = GlobalKey<FormState>();
   final emailKey = GlobalKey<FormFieldState>();
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _password = TextEditingController();
-  final _auth = FirebaseAuth.instance;
-  Future<bool> signUpWithEmailAndPassword() async {
-    try {
-      // Criar usuer
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
-              email: _email.text.trim(), password: _password.text.trim());
-      // receber user
-      FirebaseAuth.instance.userChanges().listen((User? user) {
-        if (user == null) {
-          print('User is currently signed out!');
-        } else {
-          Navigator.pushNamed(context, NamedRoutes.chat_screen);
-        }
-      });
-      if (userCredential.user == null) {
-        return false;
-      } else {
-        return true;
-      }
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        print('The account already exists for that email.');
-      }
-      return false;
-    } catch (e) {
-      print(e);
-      return false;
-    }
+  final FirebaseAuthService _auth = FirebaseAuthService();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+
+  bool isSigningUp = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 
   @override
@@ -65,7 +40,7 @@ class _ResgistrerScreenState extends State<ResgistrerScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Text(
-                'Resgistrer-se',
+                'Cadastre-se',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 36,
@@ -84,12 +59,12 @@ class _ResgistrerScreenState extends State<ResgistrerScreen> {
                   keyboardType: TextInputType.emailAddress,
                   validator: (String? value) {
                     if (value == null || value.isEmpty) {
-                      return 'Email Obrigatório';
+                      return 'O email é obrigatório';
                     }
                     return null;
                   },
                   onTap: () {},
-                  controller: _email,
+                  controller: _emailController,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
                     color: Colors.white,
@@ -125,16 +100,14 @@ class _ResgistrerScreenState extends State<ResgistrerScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: TextFormField(
                   onTap: () {},
-                  controller: _password,
+                  controller: _passwordController,
                   keyboardType: TextInputType.visiblePassword,
                   obscuringCharacter: '•',
                   obscureText: true,
                   maxLength: 20,
                   validator: (String? value) {
                     if (value == null || value.isEmpty) {
-                      formKey.currentState?.reset();
-                      emailKey.currentState?.validate();
-                      return 'Senha Obrigatória';
+                      return 'A senha é obrigatória';
                     }
                     return null;
                   },
@@ -173,27 +146,14 @@ class _ResgistrerScreenState extends State<ResgistrerScreen> {
                 child: ElevatedButton(
                   onPressed: () async {
                     formKey.currentState?.validate();
-                    bool results = await signUpWithEmailAndPassword();
-                    if (results == false) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Não foi possível realizar o cadastro',
-                            style: TextStyle(color: Colors.red),
-                          ),
-                        ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Cadastro realizado com sucesso',
-                            style: TextStyle(
-                              color: Colors.green,
-                            ),
-                          ),
-                        ),
-                      );
+                    emailKey.currentState?.validate();
+                    if (formKey.currentState!.validate() &&
+                        emailKey.currentState!.validate()) {
+                      try {
+                        _signUp();
+                      } catch (e) {
+                        print(e);
+                      }
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -208,7 +168,7 @@ class _ResgistrerScreenState extends State<ResgistrerScreen> {
                     foregroundColor: Colors.white,
                   ),
                   child: const Text(
-                    'Resgistrar',
+                    'Cadastrar',
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 20,
@@ -222,5 +182,27 @@ class _ResgistrerScreenState extends State<ResgistrerScreen> {
         ),
       ),
     );
+  }
+
+  void _signUp() async {
+    setState(() {
+      isSigningUp = true;
+    });
+    String email = _emailController.text;
+    String password = _passwordController.text;
+
+    User? user = await _auth.signUpWithEmailAndPassword(email, password);
+
+    setState(() {
+      isSigningUp = false;
+    });
+    if (user != null) {
+      showToast(
+        msg: "Usuário criado com sucesso",
+        background: Colors.green,
+      );
+      // ignore: use_build_context_synchronously
+      Navigator.pushNamed(context, NamedRoutes.chat_screen);
+    } else {}
   }
 }
