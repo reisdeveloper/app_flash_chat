@@ -18,6 +18,7 @@ class WelcomeTitleWidget extends StatelessWidget {
             fontSize: 35,
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w400,
+            color: Colors.white,
           ),
         ),
       ],
