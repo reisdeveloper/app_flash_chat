@@ -39,6 +39,14 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              const Text(
+                'Faça Login',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 36,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
               const SizedBox(
                 height: 30,
               ),
