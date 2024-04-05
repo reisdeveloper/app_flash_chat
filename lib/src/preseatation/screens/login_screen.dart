@@ -139,19 +139,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              TextButton(
-                onPressed: () {
-                  _formKey.currentState?.reset();
-                },
-                child: const Text(
-                  'Esqueceu a senha?',
-                  style: TextStyle(
-                    color: Colors.blueAccent,
-                    fontFamily: 'Poppins',
-                    fontSize: 16,
-                  ),
-                ),
-              ),
               const SizedBox(
                 height: 30,
               ),
